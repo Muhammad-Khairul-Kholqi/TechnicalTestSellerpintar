@@ -104,7 +104,7 @@ const LeftContent = () => {
                             </div>
                         </div>
 
-                        <button type="submit" disabled={isLoading} className="w-full bg-blue-500 text-white font-semibold py-2 px-6 rounded-md hover:bg-blue-600 transition-all disabled:opacity-50">
+                        <button type="submit" disabled={isLoading} className="w-full cursor-pointer bg-blue-500 text-white font-semibold py-2 px-6 rounded-md hover:bg-blue-600 transition-all disabled:opacity-50">
                             {isLoading ? 'Registering...' : 'Signup'}
                         </button>
 

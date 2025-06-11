@@ -124,7 +124,7 @@ const RightContent = () => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-all"
+                    className="w-full cursor-pointer bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-all"
                 >
                     {loading ? 'Signing in...' : 'Signin'}
                 </button>

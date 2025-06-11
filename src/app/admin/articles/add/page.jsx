@@ -10,8 +10,6 @@ export default function CreateArticlePage() {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [description, setDescription] = useState("");
 
-    const apiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY;
-
     const categories = [
         "All", "Design", "Development", "News", "Interviews",
         "Design", "Development", "News", "Interviews"
@@ -145,7 +143,7 @@ export default function CreateArticlePage() {
 
                     <div className="rounded-md overflow-hidden">
                         <Editor
-                            apiKey={apiKey}
+                            apiKey="0jau07xbmv94l5td1mq8yarhafmbzhukmkua2dipbjqurtds"
                             value={description}
                             onEditorChange={(content) => setDescription(content)}
                             init={{
