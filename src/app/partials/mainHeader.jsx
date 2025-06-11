@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import Background from "@/app/assets/bg-header.jpg";
 import { ChevronDown, Search, User, LogOut } from "lucide-react";
 
-export default function HeaderHome() {
+export default function MainHeader() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [scrolled, setScrolled] = useState(false);
@@ -41,7 +41,7 @@ export default function HeaderHome() {
                     }`}
             >
                 <div className="w-full max-w-[1300px] mx-auto flex justify-between items-center py-3">
-                    <span className="font-semibold text-md">BlogGZ.</span>
+                    <a href="/home" className="font-semibold text-md">BlogGZ.</a>
 
                     <div className="relative" ref={profileRef}>
                         <div
@@ -49,14 +49,14 @@ export default function HeaderHome() {
                             onClick={() => setProfileOpen((prev) => !prev)}
                         >
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#BFDBFE]">
-                                <span className="text-black font-medium text-[#1E3A8A]">K</span>
+                                <span className="font-medium text-[#1E3A8A]">K</span>
                             </div>
                             <span className="hidden sm:inline">Khairul Kholqi</span>
                         </div>
 
                         {profileOpen && (
                             <div className="absolute right-0 mt-4 bg-white text-black shadow-md rounded-md w-40 overflow-hidden z-50">
-                                <a href="" className="flex items-center w-full px-4 py-2 hover:bg-gray-100">
+                                <a href="/account" className="flex items-center w-full px-4 py-2 hover:bg-gray-100">
                                     <User className="w-4 h-4 mr-2" />
                                     My Account
                                 </a>
