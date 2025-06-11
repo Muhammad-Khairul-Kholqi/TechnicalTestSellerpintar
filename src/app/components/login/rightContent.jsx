@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Mail, LockKeyhole, Eye, EyeOff } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -26,29 +27,16 @@ const RightContent = () => {
         setError('');
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
-                method: 'POST',
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
+                username,
+                password
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
+                }
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                let errorMessage = '';
-
-                if (res.status === 401) {
-                    errorMessage = "The username or password you entered is incorrect. Please try again.";
-                } else {
-                    errorMessage = data?.message || "An error occurred during login.";
-                }
-
-                toast.error(errorMessage);
-                setError(errorMessage);
-                return;
-            }
+            const data = response.data;
 
             Cookies.set('token', data.token, { path: '/' });
             Cookies.set('role', data.role, { path: '/' });
@@ -63,12 +51,23 @@ const RightContent = () => {
             }, 1500);
 
         } catch (err) {
-            toast.error('Unable to connect to the server.');
-            setError('Unable to connect to the server.');
+            const status = err?.response?.status;
+            const msg = err?.response?.data?.message || 'An error occurred during login.';
+
+            let errorMessage = '';
+            if (status === 401) {
+                errorMessage = "The username or password you entered is incorrect. Please try again.";
+            } else {
+                errorMessage = msg;
+            }
+
+            toast.error(errorMessage);
+            setError(errorMessage);
+
         } finally {
             setLoading(false);
         }
-    };      
+    };
 
     return (
         <section className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white">
@@ -140,7 +139,6 @@ const RightContent = () => {
                 </div>
             </form>
 
-            {/* Toast Container */}
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
         </section>
     );

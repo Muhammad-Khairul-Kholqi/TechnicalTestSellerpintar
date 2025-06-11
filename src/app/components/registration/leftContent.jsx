@@ -1,7 +1,7 @@
 "use client";
-
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { Mail, LockKeyhole, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -33,25 +33,11 @@ const LeftContent = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, role: selectedRole }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                const msg = data.message || data.error || 'Registrasi gagal';
-                if (msg.toLowerCase().includes('username')) {
-                    toast.error('Username is already in use.');
-                } else if (msg.toLowerCase().includes('password')) {
-                    toast.error('Invalid password or already in use.');
-                } else {
-                    toast.error(msg);
-                }
-                return;
-            }                
+            const { data } = await axios.post(
+                `${process.env.NEXT_PUBLIC_BASE_API}/auth/register`,
+                { username, password, role: selectedRole },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
 
             toast.success('Registration successful! Redirecting');
             setTimeout(() => {
@@ -59,7 +45,14 @@ const LeftContent = () => {
             }, 2000);
 
         } catch (error) {
-            toast.error(`Error: ${error.message}`);
+            const msg = error?.response?.data?.message || error?.response?.data?.error || 'Registrasi gagal';
+            if (msg.toLowerCase().includes('username')) {
+                toast.error('Username is already in use.');
+            } else if (msg.toLowerCase().includes('password')) {
+                toast.error('Invalid password or already in use.');
+            } else {
+                toast.error(msg);
+            }
         } finally {
             setIsLoading(false);
         }
