@@ -1,7 +1,7 @@
 import ImageDummy from "@/app/assets/bg-header.jpg";
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 
-export default function HomePage() {
+export default function ArticlePage() {
     const dummyArticles = Array.from({ length: 9 }, (_, i) => ({
         id: i + 1,
         date: "April 12 2025",

@@ -1,10 +1,12 @@
+'use client';
+
 import { User, Lock, Settings } from 'lucide-react';
 
-export default function AccountPage() {
+export default function AdminAccountPage() {
     return (
-        <div className="mt-[70px] flex justify-center items-center p-5">
-            <div className="w-full max-w-[1300px]">
-                <div className='flex flex-col items-center space-y-6 mt-8'>
+        <ProtectedRoute requiredRole="Admin">
+            <div className="bg-white border border-gray-200 rounded-xl py-10 px-5">
+                <div className='flex flex-col items-center space-y-6'>
                     <h1 className="text-gray-600 text-lg font-semibold">User Profile</h1>
 
                     <div className="flex items-center justify-center w-14 h-14 rounded-full bg-[#BFDBFE]">
@@ -30,7 +32,7 @@ export default function AccountPage() {
                                 <span>Password:</span>
                             </div>
                             <input
-                                type="text"
+                                type="password"
                                 value="Khairul123"
                                 className="outline-none focus:border-none"
                             />
@@ -43,7 +45,7 @@ export default function AccountPage() {
                             </div>
                             <input
                                 type="text"
-                                value="User"
+                                value="Admin"
                                 className="outline-none focus:border-none"
                             />
                         </div>
@@ -52,6 +54,6 @@ export default function AccountPage() {
                     </form>
                 </div>
             </div>
-        </div>
+        </ProtectedRoute>
     )
 }

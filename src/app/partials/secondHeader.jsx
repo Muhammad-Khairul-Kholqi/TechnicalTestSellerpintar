@@ -18,7 +18,7 @@ export default function HeaderDetailArticle() {
     return (
         <header className="flex justify-center p-5 bg-white fixed top-0 left-0 right-0 border-b border-gray-100">
             <div className="w-full max-w-[1300px] flex justify-between items-center">
-                <a href="/home" className="font-semibold text-md">BlogGZ.</a>
+                <a href="/articles/list" className="font-semibold text-md">BlogGZ.</a>
 
                 <div className="relative" ref={profileRef}>
                     <div
