@@ -1,10 +1,14 @@
 'use client';
-
+import { useState } from "react";
 import { usePathname } from 'next/navigation';
 import { Newspaper, Tag, LogOut } from 'lucide-react';
+import ConfirmModal from "@/app/utils/alert/confirmModal";
+import { useAuth } from "@/app/hooks/useAuth";
 
 export default function Sidebar({ isOpen, onClose }) {
     const pathname = usePathname();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const { logout } = useAuth();
 
     return (
         <>
@@ -44,18 +48,25 @@ export default function Sidebar({ isOpen, onClose }) {
                             </a>
                         </li>
                         <li>
-                            <a
-                                href="/category"
-                                className={`flex items-center p-3 rounded-lg hover:bg-[#3B82F6] text-white transition-all 
-                                ${pathname.startsWith('/category') ? 'bg-[#3B82F6]' : ''}`}
-                            >
+                            <button className="flex items-center p-3 rounded-lg hover:bg-[#3B82F6] w-full text-white transition-all cursor-pointer" onClick={() => setShowLogoutModal(true)}>
                                 <LogOut className='w-4 h-4' />
                                 <span className="ml-2">Logout</span>
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </nav>
             </aside>
+
+            <ConfirmModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={() => {
+                    setShowLogoutModal(false);
+                    logout();
+                }}
+                title="Confirm Logout"
+                description="Are you sure you want to logout?"
+            />
         </>
     );
 }

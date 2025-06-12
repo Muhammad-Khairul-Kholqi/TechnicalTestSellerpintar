@@ -1,9 +1,9 @@
 "use client";
+import ProtectedRoute from '@/app/components/ProtectedRoute';
 import SecondHeader from "@/app/partials/secondHeader";
 import Footer from "@/app/partials/footer";
-import ProtectedRoute from '@/app/components/ProtectedRoute';
 
-export default function AccountLayout({ children }) {
+export default function DetailArticleLayout({children}) {
     return (
         <ProtectedRoute requiredRole="User">
             <div className="min-h-screen flex flex-col">
@@ -12,5 +12,5 @@ export default function AccountLayout({ children }) {
                 <Footer />
             </div>
         </ProtectedRoute>
-    );
+    )
 }

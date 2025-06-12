@@ -1,6 +1,11 @@
+"use client";
+import { useEffect, useState, useRef } from "react";
+import axios from 'axios';
 import { User, Lock, Settings } from 'lucide-react';
 
 export default function AccountPage() {
+    const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+    
     return (
         <div className="min-h-screen bg-white flex justify-center items-center p-5">
             <div className="w-full max-w-[1300px] flex justify-center">
@@ -12,16 +17,12 @@ export default function AccountPage() {
                             <span className="font-medium text-[#1E3A8A] text-xl">K</span>
                         </div>
 
-                        <form className="w-full space-y-4">
+                        <div className="w-full space-y-4">
                             <div className="flex items-center space-x-3 border border-gray-200 rounded-lg p-3">
                                 <User className="text-gray-500" />
                                 <div className="flex flex-col w-full">
                                     <label className="text-sm text-gray-500 mb-1">Username</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter your username"
-                                        className="outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
-                                    />
+                                    <span className="text-gray-700">dsfdsfsdfdsfsd</span>
                                 </div>
                             </div>
 
@@ -29,11 +30,7 @@ export default function AccountPage() {
                                 <Lock className="text-gray-500" />
                                 <div className="flex flex-col w-full">
                                     <label className="text-sm text-gray-500 mb-1">Password</label>
-                                    <input
-                                        type="password"
-                                        placeholder="Enter your password"
-                                        className="outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
-                                    />
+                                    <span className="text-gray-700">dsfdsfsdfdsfsd</span>
                                 </div>
                             </div>
 
@@ -41,21 +38,10 @@ export default function AccountPage() {
                                 <Settings className="text-gray-500" />
                                 <div className="flex flex-col w-full">
                                     <label className="text-sm text-gray-500 mb-1">Role</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter your role"
-                                        className="outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
-                                    />
+                                    <span className="text-gray-700">dsfdsfsdfdsfsd</span>
                                 </div>
                             </div>
-
-                            <button
-                                type="submit"
-                                className="w-full cursor-pointer mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200"
-                            >
-                                Save Changes
-                            </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ChevronDown, Search, Plus, ChevronLeft, ChevronRight } from "lucide-react";
-import ImageDummy from "@/app/assets/bg-header.jpg";
+import ImageDummy from "@/app/assets/offc-image.jpg";
 
 export default function ArticlePage() {
     const [dropdownOpen, setDropdownOpen] = useState(false);

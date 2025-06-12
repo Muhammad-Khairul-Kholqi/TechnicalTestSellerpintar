@@ -1,12 +1,16 @@
-import MainHeader from "@/app/partials/mainHeader";
+"use client";
 import Footer from "@/app/partials/footer";
+import ProtectedRoute from '@/app/components/ProtectedRoute';
 
 export default function LayoutArticle({ children }) {
     return (
-        <div className="flex flex-col min-h-screen">
-            <MainHeader />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-        </div>
+        <>
+            <ProtectedRoute requiredRole="User">
+                <div className="flex flex-col min-h-screen">
+                    <main className="flex-grow">{children}</main>
+                    <Footer />
+                </div>
+            </ProtectedRoute>
+        </>
     );
 }
