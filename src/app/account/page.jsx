@@ -2,7 +2,7 @@ import { User, Lock, Settings } from 'lucide-react';
 
 export default function AccountPage() {
     return (
-        <div className="mt-[70px] flex justify-center items-center p-5">
+        <div className="mt-[70px] min-h-screen flex justify-center items-center p-5 bg-yellow-100">
             <div className="w-full max-w-[1300px]">
                 <div className='flex flex-col items-center space-y-6 mt-8'>
                     <h1 className="text-gray-600 text-lg font-semibold">User Profile</h1>

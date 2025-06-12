@@ -19,6 +19,7 @@ export default function AdminLayout({ children }) {
         if (pathname.includes('/admin/categories')) return 'Categories';
         if (pathname.includes('/admin/categories/add')) return 'Categories';
         if (pathname.includes('/admin/categories/edit')) return 'Categories';
+        if (pathname.includes('/admin/account')) return 'Account';
         return 'Admin Page';
     }, [pathname]);
 

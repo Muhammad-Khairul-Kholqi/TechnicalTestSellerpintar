@@ -90,7 +90,7 @@ const RightContent = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="Enter your username"
-                            className="w-full pl-12 pr-4 py-2 border-2 border-gray-200 rounded-md"
+                            className="w-full pl-12 pr-4 py-2 border-2 border-gray-200 rounded-md outline-none"
                             required
                         />
                     </div>
@@ -109,7 +109,7 @@ const RightContent = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
-                            className="w-full pl-12 pr-12 py-2 border-2 border-gray-200 rounded-md"
+                            className="w-full pl-12 pr-12 py-2 border-2 border-gray-200 rounded-md outline-none"
                             required
                         />
                         <span
@@ -133,7 +133,7 @@ const RightContent = () => {
                     <p className="text-gray-600">
                         Don't have an account?{' '}
                         <a href="/registration" className="text-blue-500 hover:text-blue-600 font-semibold">
-                            Register here
+                            Registration here
                         </a>
                     </p>
                 </div>

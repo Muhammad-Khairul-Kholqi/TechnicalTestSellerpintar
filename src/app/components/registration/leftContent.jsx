@@ -70,7 +70,7 @@ const LeftContent = () => {
                             <label className="block text-sm font-medium text-gray-500">Username <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><Mail className="w-5 h-5" /></span>
-                                <input type="text" name="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter your username" className="w-full pl-12 pr-4 py-2 border-2 border-gray-200 rounded-md" required />
+                                <input type="text" name="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter your username" className="w-full outline-none pl-12 pr-4 py-2 border-2 border-gray-200 rounded-md" required />
                             </div>
                         </div>
 
@@ -78,7 +78,7 @@ const LeftContent = () => {
                             <label className="block text-sm font-medium text-gray-500">Password <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><LockKeyhole className="w-5 h-5" /></span>
-                                <input type={showPassword ? 'text' : 'password'} name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="w-full pl-12 pr-12 py-2 border-2 border-gray-200 rounded-md" required />
+                                <input type={showPassword ? 'text' : 'password'} name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="w-full outline-none pl-12 pr-12 py-2 border-2 border-gray-200 rounded-md" required />
                                 <span onClick={togglePassword} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer">
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </span>
@@ -88,7 +88,7 @@ const LeftContent = () => {
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-gray-500">Role <span className="text-red-500">*</span></label>
                             <div className="relative">
-                                <button onClick={toggleDropdown} type="button" className="w-full flex justify-between items-center px-4 py-2 border-2 border-gray-200 rounded-md">
+                                <button onClick={toggleDropdown} type="button" className="w-full cursor-pointer flex justify-between items-center px-4 py-2 border-2 border-gray-200 rounded-md">
                                     <span className={`${selectedRole === 'Select Role' ? 'text-gray-400' : 'text-gray-700'}`}>{selectedRole}</span>
                                     <ChevronDown className="w-4 h-4 text-gray-400" />
                                 </button>
