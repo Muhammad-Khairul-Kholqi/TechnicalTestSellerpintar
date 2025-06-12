@@ -1,21 +1,84 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import axios from 'axios';
 import { ChevronDown, Search, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import ImageDummy from "@/app/assets/offc-image.jpg";
 
 export default function ArticlePage() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [articles, setArticles] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalArticles, setTotalArticles] = useState(0);
 
-    const categories = [
-        "All", "Design", "Development", "News", "Interviews",
-        "Design", "Development", "News", "Interviews"
-    ];
+    const itemsPerPage = 10;
+    const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+
+    const fetchArticles = async (page = 1, category = "All") => {
+        try {
+            const response = await axios.get(`${BASE_API}/articles`, {
+                params: {
+                    page: page,
+                    limit: itemsPerPage,
+                    category: category !== "All" ? category : undefined
+                }
+            });
+            console.log("API response:", response.data);
+            const data = response.data;
+
+            const articlesData = data.articles || data.data || [];
+            const total = data.total || data.totalCount || articlesData.length;
+            const pages = data.totalPages || Math.ceil(total / itemsPerPage);
+
+            setArticles(articlesData);
+            setTotalArticles(total);
+            setTotalPages(pages);
+        } catch (error) {
+            console.error("Error fetching articles:", error);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            const newPage = currentPage - 1;
+            setCurrentPage(newPage);
+            fetchArticles(newPage, selectedCategory);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            const newPage = currentPage + 1;
+            setCurrentPage(newPage);
+            fetchArticles(newPage, selectedCategory);
+        }
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
+        setCurrentPage(1); 
+        setDropdownOpen(false);
+        fetchArticles(1, category);
+    };
+
+    useEffect(() => {
+        fetchArticles(currentPage, selectedCategory);
+    }, []);
 
     return (
         <div className="bg-white border border-gray-200 rounded-xl">
             <div className="p-5">
-                <h2 className="font-medium">Total Article: 25</h2>
+                <h2 className="font-medium">Total Article: {totalArticles}</h2>
             </div>
 
             <hr className="border-0.5 border-gray-100" />
@@ -41,10 +104,7 @@ export default function ArticlePage() {
                                             <li
                                                 key={category}
                                                 className="px-4 py-2 hover:bg-blue-100 rounded-md cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedCategory(category);
-                                                    setDropdownOpen(false);
-                                                }}
+                                                onClick={() => handleCategoryChange(category)}
                                             >
                                                 {category}
                                             </li>
@@ -96,49 +156,71 @@ export default function ArticlePage() {
                         </tr>
                     </thead>
                     <tbody className="text-xs">
-                        <tr className="border-b border-gray-200">
-                            <td scope="row" className="px-6 py-4">
-                                1
-                            </td>
-                            <td scope="row" className="px-6 py-4">
-                                <img
-                                    src={ImageDummy.src}
-                                    alt=""
-                                    className="w-full max-w-[100px] h-full rounded-sm group-hover:scale-105 duration-300"
-                                />
-                            </td>
-                            <td className="px-6 py-4 text-gray-500">
-                                The Future of Work: Remote-First Teams and Digital Tools
-                            </td>
-                            <td className="px-6 py-4 text-gray-500">
-                                Technology
-                            </td>
-                            <td className="px-6 py-4 text-gray-500">
-                                April 13, 2025 10:55:12
-                            </td>
-                            <td className="px-6 py-4">
-                                <div className="flex items-center justify-center gap-3 h-full">
-                                    <a href="" className="text-blue-500 hover:text-blue-600 hover:underline">Preview</a>
-                                    <a href="/admin/articles/edit" className="text-blue-500 hover:text-blue-600 hover:underline">Edit</a>
-                                    <a href="#" className="text-red-500 hover:text-red-600 hover:underline">Delete</a>
-                                </div>
-                            </td>
-                        </tr>
+                        {articles.map((article, index) => (
+                            <tr key={article.id || index} className="border-b border-gray-200">
+                                <td scope="row" className="px-6 py-4">
+                                    {(currentPage - 1) * itemsPerPage + index + 1}
+                                </td>
+                                <td scope="row" className="px-6 py-4">
+                                    <img
+                                        src={article.imageUrl || ImageDummy.src}
+                                        alt=""
+                                        className="w-full max-w-[100px] h-full rounded-sm group-hover:scale-105 duration-300"
+                                    />
+                                </td>
+                                <td className="px-6 py-4 text-gray-500">
+                                    {article.title}
+                                </td>
+                                <td className="px-6 py-4 text-gray-500">
+                                    {article.category?.name || 'Uncategorized'}
+                                </td>
+                                <td className="px-6 py-4 text-gray-500">
+                                    {formatDate(article.createdAt)}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center justify-center gap-3 h-full">
+                                        <a href="" className="text-blue-500 hover:text-blue-600 hover:underline">Preview</a>
+                                        <a href="/admin/articles/edit" className="text-blue-500 hover:text-blue-600 hover:underline">Edit</a>
+                                        <a href="#" className="text-red-500 hover:text-red-600 hover:underline">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
 
-            <div className="flex items-center justify-center gap-5 py-5">
-                <div className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-black">
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>Previous</span>
-                </div>
+            {totalPages > 1 && (
+                <div className="flex items-center justify-start gap-5 p-5">
+                    <div
+                        className={`flex items-center gap-2 cursor-pointer ${currentPage === 1
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-700 hover:text-black'
+                            }`}
+                        onClick={handlePreviousPage}
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Previous</span>
+                    </div>
 
-                <div className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-black">
-                    <span>Next</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <div className="flex items-center gap-2">
+                        <span className="text-gray-600">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                    </div>
+
+                    <div
+                        className={`flex items-center gap-2 cursor-pointer ${currentPage === totalPages
+                            ? 'text-gray-400 cursor-not-allowed'
+                            : 'text-gray-700 hover:text-black'
+                            }`}
+                        onClick={handleNextPage}
+                    >
+                        <span>Next</span>
+                        <ChevronRight className="w-4 h-4" />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

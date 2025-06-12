@@ -18,7 +18,7 @@ export default function ConfirmModal({
 
                 <div className="mt-4 flex justify-end space-x-2">
                     <button onClick={onClose} className="px-4 py-2 rounded-md border border-gray-200 hover:bg-gray-100 text-sm cursor-pointer">Cancel</button>
-                    <button onClick={onConfirm} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm cursor-pointer">Logout</button>
+                    <button onClick={onConfirm} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm cursor-pointer">Confirm</button>
                 </div>
             </div>
         </Dialog>

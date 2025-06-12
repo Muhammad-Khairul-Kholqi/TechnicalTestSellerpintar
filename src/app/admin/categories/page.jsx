@@ -1,24 +1,196 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from 'axios';
 import { Search, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import AddCategoryModal from "@/app/admin/categories/components/addCategoryModal";
 import EditCategoryModal from "@/app/admin/categories/components/editCategoryModal";
+import ConfirmModal from "@/app/utils/alert/confirmModal";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 export default function CategoriesPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [editCategory, setEditCategory] = useState(null);
+    const [deleteCategory, setDeleteCategory] = useState(null);
+    const [categories, setCategories] = useState([]);
+    const [filteredCategories, setFilteredCategories] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCategories, setTotalCategories] = useState(0);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const itemsPerPage = 10;
+    const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+
+    const fetchCategories = async () => {
+        try {
+            const token = localStorage.getItem('token') ||
+                localStorage.getItem('accessToken') ||
+                localStorage.getItem('auth_token');
+
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await axios.get(`${BASE_API}/categories`, {
+                headers: headers
+            });
+            const data = response.data;
+
+            const categoriesData = data.category || data.data || [];
+            const total = data.total || data.totalCount || categoriesData.length;
+
+            setCategories(categoriesData);
+            setFilteredCategories(categoriesData);
+            setTotalCategories(total);
+            console.log("Categories fetched:", categoriesData);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            if (error.response?.status === 401) {
+                console.error("Authentication failed when fetching categories");
+            }
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('auth_token');
+
+        window.location.href = '/';
+    };
+
+    const deleteCategoryData = async (categoryId) => {
+        try {
+            setIsDeleting(true);
+
+            const token = localStorage.getItem('token') ||
+                localStorage.getItem('accessToken') ||
+                localStorage.getItem('auth_token');
+
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await axios.delete(`${BASE_API}/categories/${categoryId}`, {
+                headers: headers
+            });
+
+            console.log("Category deleted successfully:", response.data);
+
+            await fetchCategories();
+
+            toast.success("Category deleted successfully!");
+
+        } catch (error) {
+            console.error("Error deleting category:", error);
+
+            if (error.response?.status === 401) {
+                console.error("Authentication failed when deleting category");
+                alert("Authentication failed. Please login again.");
+            } else if (error.response?.status === 404) {
+                alert("Category not found.");
+            } else if (error.response?.status === 403) {
+                alert("You don't have permission to delete this category.");
+            } else {
+                alert("Failed to delete category. Please try again.");
+            }
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
+            setDeleteCategory(null);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        if (searchQuery.trim() === "") {
+            setFilteredCategories(categories);
+        } else {
+            const filtered = categories.filter(category =>
+                category.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredCategories(filtered);
+        }
+        setCurrentPage(1);
+    }, [searchQuery, categories]);
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
 
     const handleEditClick = (category) => {
         setEditCategory(category);
         setShowEditModal(true);
     };
 
+    const handleDeleteClick = (category) => {
+        setDeleteCategory(category);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        if (deleteCategory) {
+            deleteCategoryData(deleteCategory.id);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
+        setDeleteCategory(null);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentCategories = filteredCategories.slice(startIndex, endIndex);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
     return (
         <>
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
             <div className="bg-white border border-gray-200 rounded-xl">
                 <div className="p-5">
-                    <h2 className="font-medium">Total Category: 25</h2>
+                    <h2 className="font-medium">Total Category: {totalCategories}</h2>
                 </div>
 
                 <hr className="border-0.5 border-gray-100" />
@@ -30,6 +202,8 @@ export default function CategoriesPage() {
                             type="text"
                             placeholder="Search by category"
                             className="bg-transparent outline-none w-full text-gray-800"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
                         />
                     </div>
 
@@ -61,44 +235,79 @@ export default function CategoriesPage() {
                             </tr>
                         </thead>
                         <tbody className="text-xs">
-                            <tr className="border-b border-gray-200">
-                                <td scope="row" className="px-6 py-4">
-                                    1
-                                </td>
-                                <td className="px-6 py-4 text-gray-500">
-                                    Technology
-                                </td>
-                                <td className="px-6 py-4 text-gray-500">
-                                    April 13, 2025 10:55:12
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center justify-start gap-3 h-full">
-                                        <a href="" className="text-blue-500 hover:text-blue-600 hover:underline">Preview</a>
-                                        <button
-                                            onClick={() => handleEditClick({ id: 1, name: "Technology" })}
-                                            className="text-blue-500 hover:text-blue-600 hover:underline cursor-pointer"
-                                        >
-                                            Edit
-                                        </button>
-                                        <a href="#" className="text-red-500 hover:text-red-600 hover:underline">Delete</a>
-                                    </div>
-                                </td>
-                            </tr>
+                            {currentCategories.length > 0 ? (
+                                currentCategories.map((category, index) => (
+                                    <tr className="border-b border-gray-200" key={category.id || index}>
+                                        <td scope="row" className="px-6 py-4">
+                                            {startIndex + index + 1}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-500">
+                                            {category.name}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-500">
+                                            {formatDate(category.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-start gap-3 h-full">
+                                                <button
+                                                    onClick={() => handleEditClick(category)}
+                                                    className="text-blue-500 hover:text-blue-600 hover:underline cursor-pointer"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteClick(category)}
+                                                    disabled={isDeleting}
+                                                    className="text-red-500 hover:text-red-600 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {isDeleting && deleteCategory?.id === category.id ? 'Deleting...' : 'Delete'}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                                        {searchQuery ? "No categories found matching your search." : "No categories available."}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="flex items-center justify-center gap-5 py-5">
-                    <div className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-black">
-                        <ChevronLeft className="w-4 h-4" />
-                        <span>Previous</span>
-                    </div>
+                {filteredCategories.length > 0 && (
+                    <div className="flex items-center justify-start gap-5 p-5">
+                        <div
+                            className={`flex items-center gap-2 cursor-pointer ${currentPage === 1
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-gray-700 hover:text-black'
+                                }`}
+                            onClick={handlePreviousPage}
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span>Previous</span>
+                        </div>
 
-                    <div className="flex items-center gap-2 cursor-pointer text-gray-700 hover:text-black">
-                        <span>Next</span>
-                        <ChevronRight className="w-4 h-4" />
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-600">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                        </div>
+
+                        <div
+                            className={`flex items-center gap-2 cursor-pointer ${currentPage === totalPages
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-gray-700 hover:text-black'
+                                }`}
+                            onClick={handleNextPage}
+                        >
+                            <span>Next</span>
+                            <ChevronRight className="w-4 h-4" />
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             {showAddModal && (
@@ -109,8 +318,33 @@ export default function CategoriesPage() {
                 <EditCategoryModal
                     category={editCategory}
                     onClose={() => setShowEditModal(false)}
+                    onSuccess={() => {
+                        fetchCategories();
+                        setShowEditModal(false);
+                    }}
                 />
             )}
+
+            {showDeleteModal && (
+                <ConfirmModal
+                    isOpen={showDeleteModal}
+                    onClose={() => setShowDeleteModal(false)}
+                    onConfirm={handleDeleteConfirm}
+                    title="Confirm Delete"
+                    description="Are you sure you want to delete this data?"
+                />
+            )}
+
+            <ConfirmModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={() => {
+                    setShowLogoutModal(false);
+                    logout();
+                }}
+                title="Confirm Delete"
+                description="Are you sure you want to delete this data?"
+            />
         </>
     );
 }

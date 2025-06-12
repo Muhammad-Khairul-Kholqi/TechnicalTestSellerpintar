@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import axios from 'axios';
 import { MoveLeft, Image, ChevronDown } from "lucide-react";
 import { Editor } from '@tinymce/tinymce-react';
 
@@ -9,11 +10,39 @@ export default function CreateArticlePage() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [description, setDescription] = useState("");
+    const [selectedCategoryId, setSelectedCategoryId] = useState("all");
+    const [categories, setCategories] = useState([]);
 
-    const categories = [
-        "All", "Design", "Development", "News", "Interviews",
-        "Design", "Development", "News", "Interviews"
-    ];
+    const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get(`${BASE_API}/categories`);
+            const data = response.data;
+            setCategories([{ id: "all", name: "All" }, ...data.data]);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category.name);
+        setSelectedCategoryId(category.id);
+        setCurrentPage(1);
+        setSearchTerm("");
+
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        const categoryId = category.id === "all" ? null : category.id;
+        fetchArticles(1, categoryId, "");
+        setDropdownOpen(false);
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -117,16 +146,13 @@ export default function CreateArticlePage() {
                             <div className="absolute top-full left-0 w-full mt-1 z-10 rounded-md shadow-md bg-white overflow-hidden">
                                 <div className="max-h-[200px] overflow-y-auto scrollbar-hide">
                                     <ul className="text-gray-800 p-2 space-y-1">
-                                        {categories.map((category, index) => (
+                                        {categories.map((category) => (
                                             <li
-                                                key={`${category}-${index}`}
+                                                key={category.id}
                                                 className="px-4 py-2 hover:bg-blue-100 rounded-md cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedCategory(category);
-                                                    setDropdownOpen(false);
-                                                }}
+                                                onClick={() => handleCategoryChange(category)}
                                             >
-                                                {category}
+                                                {category.name}
                                             </li>
                                         ))}
                                     </ul>
