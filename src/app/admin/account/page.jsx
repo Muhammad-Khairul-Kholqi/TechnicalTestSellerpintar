@@ -1,57 +1,64 @@
 'use client';
 
-import { User, Lock, Settings } from 'lucide-react';
+import { User, Lock, Settings, Save } from 'lucide-react';
 
 export default function AdminAccountPage() {
     return (
-        <div className="bg-white border border-gray-200 rounded-xl py-10 px-5">
-            <div className='flex flex-col items-center space-y-6'>
-                <h1 className="text-gray-600 text-lg font-semibold">User Profile</h1>
+        <div className="bg-white flex items-center justify-center px-5 py-10 rounded-xl">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 w-full max-w-md shadow-md">
+                <div className="flex flex-col items-center space-y-6">
+                    <h1 className="text-gray-600 text-lg font-semibold">User Profile</h1>
 
-                <div className="flex items-center justify-center w-14 h-14 rounded-full bg-[#BFDBFE]">
-                    <span className="font-medium text-[#1E3A8A] text-xl">K</span>
+                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-[#BFDBFE]">
+                        <span className="font-medium text-[#1E3A8A] text-xl">K</span>
+                    </div>
+
+                    <form className="w-full space-y-4">
+                        <div className="flex items-center space-x-3 border border-gray-200 rounded-lg p-3">
+                            <User className="text-gray-500" />
+                            <div className="flex flex-col w-full">
+                                <label className="text-sm text-gray-500 mb-1">Username</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter your username"
+                                    className="outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-3 border border-gray-200 rounded-lg p-3">
+                            <Lock className="text-gray-500" />
+                            <div className="flex flex-col w-full">
+                                <label className="text-sm text-gray-500 mb-1">Password</label>
+                                <input
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    className="outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-3 border border-gray-200 rounded-lg p-3">
+                            <Settings className="text-gray-500" />
+                            <div className="flex flex-col w-full">
+                                <label className="text-sm text-gray-500 mb-1">Role</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter your role"
+                                    className="outline-none text-gray-700 bg-transparent placeholder:text-gray-400"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full cursor-pointer mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200"
+                        >
+                            Save Changes
+                        </button>
+                    </form>
                 </div>
-
-                <form action="" className="flex flex-col items-center space-y-4">
-                    <div className="flex items-center px-5 py-2 rounded-md border border-gray-200 bg-gray-50 gap-5 w-full max-w-[700px]">
-                        <div className="flex items-center gap-2 text-gray-700">
-                            <User className='w-4 h-4' />
-                            <span>Username:</span>
-                        </div>
-                        <input
-                            type="text"
-                            value="Khairul Kholqi"
-                            className="outline-none focus:border-none"
-                        />
-                    </div>
-
-                    <div className="flex items-center px-5 py-2 rounded-md border border-gray-200 bg-gray-50 gap-5 w-full max-w-[700px]">
-                        <div className="flex items-center gap-2 text-gray-700">
-                            <Lock className='w-4 h-4' />
-                            <span>Password:</span>
-                        </div>
-                        <input
-                            type="password"
-                            value="Khairul123"
-                            className="outline-none focus:border-none"
-                        />
-                    </div>
-
-                    <div className="flex items-center px-5 py-2 rounded-md border border-gray-200 bg-gray-50 gap-5 w-full max-w-[700px]">
-                        <div className="flex items-center gap-2 text-gray-700">
-                            <Settings className='w-4 h-4' />
-                            <span>Role:</span>
-                        </div>
-                        <input
-                            type="text"
-                            value="Admin"
-                            className="outline-none focus:border-none"
-                        />
-                    </div>
-
-                    <button className='py-2 px-5 rounded-md text-white bg-blue-500 hover:bg-blue-600 w-full cursor-pointer'>Save Changes</button>
-                </form>
             </div>
         </div>
-    )
+    );
 }

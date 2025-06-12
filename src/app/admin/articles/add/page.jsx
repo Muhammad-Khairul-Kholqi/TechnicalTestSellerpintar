@@ -170,7 +170,7 @@ export default function CreateArticlePage() {
                     </div>
                 </div>
 
-                <div className="w-full pt-4 grid grid-cols-3 items-center gap-4">
+                <div className="w-full pt-4 grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-1 items-center gap-4">
                     <a
                         href="/admin/articles"
                         className="w-full text-center cursor-pointer bg-white hover:bg-gray-100 border border-gray-200 text-black font-medium py-2 px-4 rounded-md transition-colors"
