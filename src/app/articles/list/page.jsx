@@ -415,7 +415,7 @@ export default function ArticlePage() {
                                                 {article.title || 'Untitled Article'}
                                             </h1>
 
-                                            <p className="text-gray-600 text-sm sm:text-base line-clamp-3">
+                                            <p className="text-gray-600 text-sm sm:text-base line-clamp-3 w-full max-w-[290px]">
                                                 {truncateDescription(article.content || '', 15)}
                                             </p>
 

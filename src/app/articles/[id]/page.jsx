@@ -151,7 +151,7 @@ export default function DetailArticlePage() {
                     {loadingRelated ? (
                         <p className="mt-5 text-gray-500">Loading related articles...</p>
                     ) : (
-                        <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-start gap-8 mt-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4 sm:gap-6 lg:gap-8 mt-6 sm:mt-8">
                             {relatedArticles.map((art) => (
                                 <Link
                                     key={art.id}
@@ -169,7 +169,7 @@ export default function DetailArticlePage() {
                                     <h1 className="font-semibold text-lg group-hover:underline duration-300 line-clamp-2">
                                         {art.title}
                                     </h1>
-                                    <p className="text-gray-600 line-clamp-3">
+                                    <p className="text-gray-600 line-clamp-3 w-full max-w-[290px]">
                                         {art.description ||
                                             (art.content ?
                                                 getTrimmedContent(art.content, 20).replace(/<[^>]+>/g, '')
