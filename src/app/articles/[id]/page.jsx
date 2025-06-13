@@ -99,7 +99,7 @@ export default function DetailArticlePage() {
             <div className="mt-[70px] flex justify-center p-5">
                 <div className="w-full max-w-[1300px] mt-10">
                     <div className="flex flex-col items-center space-y-5">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center flex-wrap gap-3">
                             <span className="text-gray-600 text-sm">
                                 {formatDate(article.createdAt)}
                             </span>

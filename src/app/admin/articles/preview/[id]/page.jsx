@@ -77,7 +77,7 @@ export default function DetailArticlePage() {
             <div className="bg-white border border-gray-200 rounded-xl px-5 py-15">
                 <div className="">
                     <div className="flex flex-col items-center space-y-5">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center flex-wrap gap-3">
                             <span className="text-gray-600 text-sm">{formatDate(article.createdAt)}</span>
                             <div className="bg-gray-600 p-0.5 rounded-full"></div>
                             <span className="text-gray-600 text-sm">Created by {article.user?.username || "Unknown"}</span>

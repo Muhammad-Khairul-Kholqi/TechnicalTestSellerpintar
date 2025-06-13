@@ -148,7 +148,7 @@ export default function ArticlePage() {
         setFilteredArticles(result);
         setTotalArticles(result.length);
         setTotalPages(Math.ceil(result.length / ARTICLES_PER_PAGE));
-        setCurrentPage(1); 
+        setCurrentPage(1);
     };
 
     useEffect(() => {
@@ -260,50 +260,59 @@ export default function ArticlePage() {
                 draggable
                 pauseOnHover
             />
-            <div
-                className={`fixed px-5 top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white text-black shadow-md" : "bg-transparent text-white"
+            <nav
+                className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white text-black shadow-md" : "bg-transparent text-white"
                     }`}
             >
-                <div className="w-full max-w-[1300px] mx-auto flex justify-between items-center py-3">
-                    <a href="/articles/list" className="font-semibold text-md">BlogGZ.</a>
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+                    <div className="flex justify-between items-center h-16">
+                        <a href="/articles/list" className="font-semibold text-lg sm:text-xl flex-shrink-0">
+                            BlogGZ.
+                        </a>
 
-                    <div className="relative" ref={profileRef}>
-                        <div
-                            className="flex gap-2 items-center cursor-pointer"
-                            onClick={() => setProfileOpen((prev) => !prev)}
-                        >
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#BFDBFE]">
-                                <span className="font-medium text-[#1E3A8A]">
-                                    {initial || 'U'}
+                        <div className="relative flex-shrink-0" ref={profileRef}>
+                            <button
+                                className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-1 cursor-pointer"
+                                onClick={() => setProfileOpen((prev) => !prev)}
+                            >
+                                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#BFDBFE]">
+                                    <span className="font-medium text-[#1E3A8A] text-sm">
+                                        {initial || 'U'}
+                                    </span>
+                                </div>
+                                <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">
+                                    {username || 'User'}
                                 </span>
-                            </div>
-                            <span className="hidden sm:inline">
-                                {username || 'User'}
-                            </span>
-                        </div>
+                            </button>
 
-                        {profileOpen && (
-                            <div className="absolute right-0 mt-4 bg-white text-black shadow-md rounded-md w-40 overflow-hidden z-50">
-                                <a href="/account" className="flex items-center w-full px-4 py-2 hover:bg-gray-100">
-                                    <User className="w-4 h-4 mr-2" />
-                                    My Account
-                                </a>
-                                <hr className="my-2 px-2 border-gray-200" />
-                                <button
-                                    onClick={() => setShowLogoutModal(true)}
-                                    className="flex text-red-600 items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                >
-                                    <LogOut className="w-4 h-4 mr-2" />
-                                    Logout
-                                </button>
-                            </div>
-                        )}
+                            {profileOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                                    <div className="py-1">
+                                        <a
+                                            href="/account"
+                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                        >
+                                            <User className="w-4 h-4 mr-3" />
+                                            My Account
+                                        </a>
+                                        <hr className="border-gray-200" />
+                                        <button
+                                            onClick={() => setShowLogoutModal(true)}
+                                            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
+                                        >
+                                            <LogOut className="w-4 h-4 mr-3" />
+                                            Logout
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </nav>
 
             <header
-                className="relative flex justify-center text-white pt-[72px]"
+                className="relative flex justify-center text-white pt-16 min-h-[400px] sm:min-h-[450px]"
                 style={{
                     backgroundImage: `url(${Background.src})`,
                     backgroundSize: "cover",
@@ -312,23 +321,28 @@ export default function ArticlePage() {
             >
                 <div className="absolute inset-0 bg-blue-600 opacity-70 z-0" />
 
-                <div className="relative z-10 w-full px-5 py-10">
-                    <div className="mx-auto w-full max-w-[1300px] flex flex-col items-center space-y-4">
-                        <span className="font-semibold text-center">Blog Genzet</span>
-                        <h1 className="xl:text-4xl lg:text-3xl md:text-2xl sm:text-2xl text-2xl font-medium text-center">
-                            The Journal: Design Resources, <br /> Interview, and Industry News
+                <div className="relative z-10 w-full px-3 sm:px-5 py-6 sm:py-10">
+                    <div className="mx-auto w-full max-w-[1300px] flex flex-col items-center space-y-3 sm:space-y-4">
+                        <span className="font-semibold text-center text-sm sm:text-base">Blog Genzet</span>
+
+                        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium text-center leading-tight px-2">
+                            The Journal: Design Resources, <br className="hidden sm:block" />
+                            <span className="sm:hidden"> </span>Interview, and Industry News
                         </h1>
-                        <h2 className="text-xl text-center">Your daily dose of design insights!</h2>
+
+                        <h2 className="text-base sm:text-lg md:text-xl text-center px-2">
+                            Your daily dose of design insights!
+                        </h2>
 
                         <div className="bg-blue-500 p-2 rounded-lg flex flex-col sm:flex-row items-stretch sm:items-center w-full max-w-[600px] gap-2">
                             <div className="relative w-full sm:w-[30%]">
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                                    className="w-full px-3 py-2 bg-gray-100 text-gray-800 rounded-md flex justify-between items-center cursor-pointer"
+                                    className="w-full px-3 py-2 bg-gray-100 text-gray-800 rounded-md flex justify-between items-center cursor-pointer text-sm sm:text-base"
                                 >
-                                    <span>{selectedCategory}</span>
+                                    <span className="truncate mr-2">{selectedCategory}</span>
                                     <ChevronDown
-                                        className={`h-4 w-4 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                                        className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
                                     />
                                 </button>
 
@@ -339,7 +353,7 @@ export default function ArticlePage() {
                                                 {categories.map((category) => (
                                                     <li
                                                         key={category.id}
-                                                        className="px-4 py-2 hover:bg-blue-100 rounded-md cursor-pointer"
+                                                        className="px-3 sm:px-4 py-2 hover:bg-blue-100 rounded-md cursor-pointer text-sm sm:text-base truncate"
                                                         onClick={() => handleCategoryChange(category)}
                                                     >
                                                         {category.name}
@@ -352,13 +366,13 @@ export default function ArticlePage() {
                             </div>
 
                             <div className="flex items-center bg-gray-100 px-3 py-2 rounded-md w-full sm:w-[70%]">
-                                <Search className="text-gray-600 h-4 w-4 mr-2" />
+                                <Search className="text-gray-600 h-4 w-4 mr-2 flex-shrink-0" />
                                 <input
                                     type="text"
                                     placeholder="Search articles..."
                                     value={searchTerm}
                                     onChange={handleSearch}
-                                    className="bg-transparent outline-none w-full text-gray-800"
+                                    className="bg-transparent outline-none w-full text-gray-800 text-sm sm:text-base"
                                 />
                             </div>
                         </div>
@@ -366,9 +380,9 @@ export default function ArticlePage() {
                 </div>
             </header>
 
-            <section className="flex justify-center p-5 mt-5">
+            <section className="flex justify-center p-3 sm:p-5 mt-5">
                 <div className="w-full max-w-[1300px]">
-                    <span className="text-lg text-gray-500 font-medium">
+                    <span className="text-sm sm:text-lg text-gray-500 font-medium">
                         Showing: {totalArticles > 0 ? `${start}-${end}` : '0'} of {totalArticles} articles
                     </span>
 
@@ -378,45 +392,51 @@ export default function ArticlePage() {
                         </div>
                     ) : (
                         <>
-                            <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-start gap-8 mt-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-4 sm:gap-6 lg:gap-8 mt-6 sm:mt-8">
                                 {currentArticles.length > 0 ? (
                                     currentArticles.map((article) => (
-                                        <a key={article.id} href={`/articles/${article.id}`} className="flex flex-col items-start space-y-2 group">
-                                            <img
-                                                src={article.imageUrl || ImageDummy.src}
-                                                alt={article.title || "Article image"}
-                                                className="w-full h-[250px] object-cover rounded-lg group-hover:scale-105 duration-300 border border-gray-200"
-                                                onError={(e) => {
-                                                    e.target.src = ImageDummy.src;
-                                                }}
-                                            />
+                                        <a key={article.id} href={`/articles/${article.id}`} className="flex flex-col items-start space-y-2 sm:space-y-3 group">
+                                            <div className="w-full aspect-[4/3] overflow-hidden rounded-lg border border-gray-200">
+                                                <img
+                                                    src={article.imageUrl || ImageDummy.src}
+                                                    alt={article.title || "Article image"}
+                                                    className="w-full h-full object-cover group-hover:scale-105 duration-300"
+                                                    onError={(e) => {
+                                                        e.target.src = ImageDummy.src;
+                                                    }}
+                                                />
+                                            </div>
 
-                                            <span className="text-gray-400 text-sm mt-2">
+                                            <span className="text-gray-400 text-xs sm:text-sm mt-2">
                                                 {formatDate(article.createdAt)}
                                             </span>
 
-                                            <h1 className="font-semibold text-lg group-hover:underline duration-300">
+                                            <h1 className="font-semibold text-base sm:text-lg group-hover:underline duration-300 line-clamp-2">
                                                 {article.title || 'Untitled Article'}
                                             </h1>
 
-                                            <p className="text-gray-600">
+                                            <p className="text-gray-600 text-sm sm:text-base line-clamp-3">
                                                 {truncateDescription(article.content || '', 15)}
                                             </p>
 
-                                            <div className="flex items-center gap-4">
-                                                <div className="bg-[#BFDBFE] group-hover:bg-[#BFDBFE]/80 duration-300 rounded-full px-4 py-1">
-                                                    <span className="text-sm">{article.category?.name || 'Uncategorized'}</span>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <div className="bg-[#BFDBFE] group-hover:bg-[#BFDBFE]/80 duration-300 rounded-full px-3 py-1">
+                                                    <span className="text-xs sm:text-sm truncate max-w-[120px]">
+                                                        {article.category?.name || 'Uncategorized'}
+                                                    </span>
                                                 </div>
 
-                                                <div className="bg-[#E5E7EB] group-hover:bg-[#E5E7EB]/80 duration-300 rounded-full px-4 py-1">
-                                                    <span className="text-sm">{article.user?.username || 'Anonymous'}</span>
+                                                <div className="bg-[#E5E7EB] group-hover:bg-[#E5E7EB]/80 duration-300 rounded-full px-3 py-1">
+                                                    <span className="text-xs sm:text-sm truncate max-w-[100px]">
+                                                        {article.user?.username || 'Anonymous'}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </a>
                                     ))
                                 ) : (
                                     <div className="col-span-full flex justify-center items-center py-20">
-                                        <div className="text-gray-500 text-lg">
+                                        <div className="text-gray-500 text-base sm:text-lg text-center px-4">
                                             {searchTerm || selectedCategory !== "All"
                                                 ? "No articles found matching your filters."
                                                 : "No articles available."}
@@ -426,32 +446,32 @@ export default function ArticlePage() {
                             </div>
 
                             {totalPages > 1 && (
-                                <div className="flex items-center justify-center gap-5 mt-10">
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mt-8 sm:mt-10">
                                     <div
-                                        className={`flex items-center gap-2 cursor-pointer ${currentPage === 1
+                                        className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md ${currentPage === 1
                                             ? 'text-gray-400 cursor-not-allowed'
-                                            : 'text-gray-700 hover:text-black'
+                                            : 'text-gray-700 hover:text-black hover:bg-gray-100'
                                             }`}
                                         onClick={handlePreviousPage}
                                     >
                                         <ChevronLeft className="w-4 h-4" />
-                                        <span>Previous</span>
+                                        <span className="text-sm sm:text-base">Previous</span>
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <span className="text-gray-600">
+                                        <span className="text-gray-600 text-sm sm:text-base">
                                             Page {currentPage} of {totalPages}
                                         </span>
                                     </div>
 
                                     <div
-                                        className={`flex items-center gap-2 cursor-pointer ${currentPage === totalPages
+                                        className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md ${currentPage === totalPages
                                             ? 'text-gray-400 cursor-not-allowed'
-                                            : 'text-gray-700 hover:text-black'
+                                            : 'text-gray-700 hover:text-black hover:bg-gray-100'
                                             }`}
                                         onClick={handleNextPage}
                                     >
-                                        <span>Next</span>
+                                        <span className="text-sm sm:text-base">Next</span>
                                         <ChevronRight className="w-4 h-4" />
                                     </div>
                                 </div>
@@ -460,6 +480,7 @@ export default function ArticlePage() {
                     )}
                 </div>
             </section>
+
             <ConfirmModal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}
