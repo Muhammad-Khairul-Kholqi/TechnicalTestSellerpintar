@@ -8,6 +8,7 @@ import ConfirmModal from "@/app/utils/alert/confirmModal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Cookies from 'js-cookie'; 
 
 export default function CategoriesPage() {
     const [showAddModal, setShowAddModal] = useState(false);
@@ -26,16 +27,39 @@ export default function CategoriesPage() {
     const itemsPerPage = 10;
     const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
 
+    const getAuthToken = () => {
+        return Cookies.get('token') ||
+            localStorage.getItem('token') ||
+            localStorage.getItem('accessToken') ||
+            localStorage.getItem('auth_token');
+    };
+
+    const handleAuthError = () => {
+        Cookies.remove('token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('auth_token');
+
+        toast.error("Session expired. Please login again.");
+
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    };
+
     const fetchCategories = async () => {
         try {
-            const token = localStorage.getItem('token') ||
-                localStorage.getItem('accessToken') ||
-                localStorage.getItem('auth_token');
+            const token = getAuthToken();
 
-            const headers = {};
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+            if (!token) {
+                handleAuthError();
+                return;
             }
+
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
 
             const response = await axios.get(`${BASE_API}/categories`, {
                 headers: headers
@@ -48,16 +72,19 @@ export default function CategoriesPage() {
             setCategories(categoriesData);
             setFilteredCategories(categoriesData);
             setTotalCategories(total);
-            console.log("Categories fetched:", categoriesData);
         } catch (error) {
             console.error("Error fetching categories:", error);
+
             if (error.response?.status === 401) {
-                console.error("Authentication failed when fetching categories");
+                handleAuthError();
+            } else {
+                toast.error("Failed to fetch categories. Please try again.");
             }
         }
     };
 
     const logout = () => {
+        Cookies.remove('token');
         localStorage.removeItem('token');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('auth_token');
@@ -69,20 +96,22 @@ export default function CategoriesPage() {
         try {
             setIsDeleting(true);
 
-            const token = localStorage.getItem('token') ||
-                localStorage.getItem('accessToken') ||
-                localStorage.getItem('auth_token');
+            const token = getAuthToken();
 
-            const headers = {};
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+            if (!token) {
+                toast.error("Authentication token missing. Redirecting to login...");
+                handleAuthError();
+                return;
             }
+
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
 
             const response = await axios.delete(`${BASE_API}/categories/${categoryId}`, {
                 headers: headers
             });
-
-            console.log("Category deleted successfully:", response.data);
 
             await fetchCategories();
 
@@ -92,14 +121,13 @@ export default function CategoriesPage() {
             console.error("Error deleting category:", error);
 
             if (error.response?.status === 401) {
-                console.error("Authentication failed when deleting category");
-                alert("Authentication failed. Please login again.");
+                handleAuthError();
             } else if (error.response?.status === 404) {
-                alert("Category not found.");
+                toast.error("Category not found.");
             } else if (error.response?.status === 403) {
-                alert("You don't have permission to delete this category.");
+                toast.error("You don't have permission to delete this category.");
             } else {
-                alert("Failed to delete category. Please try again.");
+                toast.error("Failed to delete category. Please try again.");
             }
         } finally {
             setIsDeleting(false);
@@ -109,6 +137,12 @@ export default function CategoriesPage() {
     };
 
     useEffect(() => {
+        const token = getAuthToken();
+        if (!token) {
+            handleAuthError();
+            return;
+        }
+
         fetchCategories();
     }, []);
 
@@ -125,12 +159,18 @@ export default function CategoriesPage() {
     }, [searchQuery, categories]);
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'Invalid Date';
+        }
     };
 
     const handleEditClick = (category) => {
@@ -188,6 +228,7 @@ export default function CategoriesPage() {
                 draggable
                 pauseOnHover
             />
+
             <div className="bg-white border border-gray-200 rounded-xl">
                 <div className="p-5">
                     <h2 className="font-medium">Total Category: {totalCategories}</h2>
@@ -311,7 +352,10 @@ export default function CategoriesPage() {
             </div>
 
             {showAddModal && (
-                <AddCategoryModal onClose={() => setShowAddModal(false)} />
+                <AddCategoryModal
+                    onClose={() => setShowAddModal(false)}
+                    onSuccess={fetchCategories} 
+                />
             )}
 
             {showEditModal && (
@@ -331,7 +375,7 @@ export default function CategoriesPage() {
                     onClose={() => setShowDeleteModal(false)}
                     onConfirm={handleDeleteConfirm}
                     title="Confirm Delete"
-                    description="Are you sure you want to delete this data?"
+                    description="Are you sure you want to delete this category?"
                 />
             )}
 
@@ -342,8 +386,8 @@ export default function CategoriesPage() {
                     setShowLogoutModal(false);
                     logout();
                 }}
-                title="Confirm Delete"
-                description="Are you sure you want to delete this data?"
+                title="Confirm Logout"
+                description="Are you sure you want to logout?"
             />
         </>
     );

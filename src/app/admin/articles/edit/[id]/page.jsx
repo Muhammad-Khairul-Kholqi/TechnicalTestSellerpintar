@@ -1,13 +1,17 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import axios from 'axios';
+import { useParams, useRouter } from 'next/navigation';
 import { MoveLeft, Image, ChevronDown } from "lucide-react";
 import { Editor } from '@tinymce/tinymce-react';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
-export default function CreateArticlePage() {
+export default function EditArticlePage() {
+    const params = useParams();
+    const id = params.id;
+    const router = useRouter();
     const [fileName, setFileName] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
@@ -19,6 +23,7 @@ export default function CreateArticlePage() {
     const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(false);
     const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+    const [initialData, setInitialData] = useState(null);
     const dropdownRef = useRef(null);
 
     const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
@@ -76,7 +81,7 @@ export default function CreateArticlePage() {
             }
         }
 
-        return true; 
+        return true;
     };
 
     const fetchCategories = async () => {
@@ -111,9 +116,55 @@ export default function CreateArticlePage() {
         }
     };
 
+    const fetchArticle = async () => {
+        try {
+            const token = getAuthToken();
+
+            if (!token) {
+                setErrorMessage("Authentication required. Please login first.");
+                return;
+            }
+
+            if (!validateToken(token)) {
+                setErrorMessage("Invalid or expired token. Please login again.");
+                return;
+            }
+
+            const response = await axios.get(`${BASE_API}/articles/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const article = response.data?.data || response.data;
+
+            if (!article) {
+                throw new Error("Article data not found in response");
+            }
+
+            setInitialData(article);
+            setTitle(article.title);
+            setDescription(article.content);
+            setSelectedCategory(article.category?.name || "Select Category");
+            setSelectedCategoryId(article.categoryId);
+            setUploadedImageUrl(article.imageUrl || "");
+        } catch (error) {
+            console.error("Error fetching article:", error);
+            if (error.response?.status === 404) {
+                setErrorMessage("Article not found");
+            } else if (error.response?.status === 401) {
+                setErrorMessage("Session expired. Please login again.");
+            } else {
+                setErrorMessage("Failed to load article data");
+            }
+        }
+    };
+
     useEffect(() => {
         fetchCategories();
-    }, []);
+        if (id) fetchArticle();
+    }, [id]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -168,7 +219,7 @@ export default function CreateArticlePage() {
 
     const uploadImage = async () => {
         if (!selectedFile) {
-            throw new Error("No image selected");
+            return uploadedImageUrl;
         }
 
         try {
@@ -189,7 +240,7 @@ export default function CreateArticlePage() {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
-                timeout: 30000, 
+                timeout: 30000,
             });
 
             return response.data.imageUrl;
@@ -197,9 +248,6 @@ export default function CreateArticlePage() {
             console.error("Error uploading image:", error);
 
             if (error.response) {
-                console.error("Response status:", error.response.status);
-                console.error("Response data:", error.response.data);
-
                 if (error.response.status === 401) {
                     const possibleKeys = ['token', 'authToken', 'accessToken', 'jwt'];
                     possibleKeys.forEach(key => {
@@ -207,12 +255,8 @@ export default function CreateArticlePage() {
                         sessionStorage.removeItem(key);
                     });
                     throw new Error("Authentication failed. Please login again.");
-                } else if (error.response.status === 403) {
-                    throw new Error("Access denied. Admin privileges required to upload images.");
                 } else if (error.response.status === 413) {
                     throw new Error("File too large. Please choose a smaller image.");
-                } else if (error.response.status === 500) {
-                    throw new Error("Server error occurred during upload. Please try again.");
                 } else {
                     throw new Error(`Upload failed: ${error.response.data?.message || error.response.data?.error || 'Unknown error'}`);
                 }
@@ -222,30 +266,6 @@ export default function CreateArticlePage() {
                 throw new Error(`Failed to upload image: ${error.message}`);
             }
         }
-    };
-
-    const validateArticleData = (data) => {
-        const errors = [];
-
-        if (!data.title || typeof data.title !== 'string' || data.title.trim().length === 0) {
-            errors.push("Title is required and must be a non-empty string");
-        }
-
-        if (!data.content || typeof data.content !== 'string' || data.content.trim().length === 0) {
-            errors.push("Content is required and must be a non-empty string");
-        }
-
-        if (!data.categoryId) {
-            errors.push("Category ID is required");
-        }
-
-        const categoryExists = categories.find(cat => cat.id == data.categoryId);
-
-        if (!categoryExists && categories.length > 0) {
-            errors.push(`Category ID ${data.categoryId} does not exist in available categories: ${categories.map(c => c.id).join(', ')}`);
-        }
-
-        return errors;
     };
 
     const handleSubmit = async () => {
@@ -264,14 +284,9 @@ export default function CreateArticlePage() {
             return;
         }
 
-        if (!selectedFile) {
-            setErrorMessage("Please select a thumbnail image");
-            return;
-        }
-
         const token = getAuthToken();
         if (!token) {
-            setErrorMessage("Please login first to create an article");
+            setErrorMessage("Please login first to edit the article");
             return;
         }
 
@@ -280,93 +295,49 @@ export default function CreateArticlePage() {
             return;
         }
 
-        await fetchCategories();
-
         setLoading(true);
         setErrorMessage("");
 
         try {
             const imageUrl = await uploadImage();
-            setUploadedImageUrl(imageUrl);
 
-            const categoryId = selectedCategoryId;
-
-            const selectedCat = categories.find(cat => cat.id == categoryId);
-
-            if (!selectedCat) {
-                setErrorMessage(`Selected category (ID: ${categoryId}) not found. Please refresh and try again.`);
-                setLoading(false);
-                return;
-            }
-
-            let articleData = {
+            const updatedData = {
                 title: title.trim(),
                 content: description,
-                categoryId: selectedCat.id,
+                categoryId: selectedCategoryId,
+                ...(imageUrl && { imageUrl })
             };
 
-            if (imageUrl) {
-                articleData.imageUrl = imageUrl; 
-            }
+            const response = await axios.put(
+                `${BASE_API}/articles/${id}`,
+                updatedData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    timeout: 30000,
+                }
+            );
 
-            const validationErrors = validateArticleData(articleData);
-            if (validationErrors.length > 0) {
-                setErrorMessage(`Validation failed: ${validationErrors.join(', ')}`);
-                setLoading(false);
-                return;
-            }
-
-            const response = await axios.post(`${BASE_API}/articles`, articleData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                timeout: 30000,
-            });
-
-            if (response.status === 200 || response.status === 201) {
-                toast.success("Article created successfully!");
-                setTitle("");
-                setDescription("");
-                setSelectedCategory("Select Category");
-                setSelectedCategoryId("");
-                setSelectedFile(null);
-                setFileName("");
-                setUploadedImageUrl("");
-
-                window.location.href = '/admin/articles';
+            if (response.status === 200) {
+                toast.success("Article updated successfully!");
+                setTimeout(() => router.push('/admin/articles'), 1500);
             }
         } catch (error) {
-            console.error("Error in handleSubmit:", error);
-            console.error("Error response:", error.response?.data);
-            console.error("Error status:", error.response?.status);
-            console.error("Error headers:", error.response?.headers);
+            console.error("Error updating article:", error);
 
-            let errorMsg = "Failed to create article";
-
+            let errorMsg = "Failed to update article";
             if (error.response?.status === 400) {
                 const errorData = error.response.data;
-
                 if (errorData?.message) {
                     errorMsg = `Bad Request: ${errorData.message}`;
-                } else if (errorData?.error) {
-                    errorMsg = `Bad Request: ${errorData.error}`;
                 } else if (errorData?.errors) {
-                    const errors = Array.isArray(errorData.errors)
-                        ? errorData.errors.join(', ')
-                        : Object.values(errorData.errors).flat().join(', ');
-                    errorMsg = `Validation Error: ${errors}`;
-                } else {
-                    errorMsg = "Bad Request: Please check your input data";
-                }
-            } else if (error.response?.status === 422) {
-                const errorData = error.response.data;
-                if (errorData?.errors) {
                     const errors = Object.values(errorData.errors).flat().join(', ');
                     errorMsg = `Validation Error: ${errors}`;
-                } else {
-                    errorMsg = errorData?.message || "Validation failed";
                 }
+            } else if (error.response?.status === 404) {
+                errorMsg = "Article not found";
             } else if (error.message.includes("authentication") || error.message.includes("login")) {
                 errorMsg = error.message;
             } else if (error.response?.data?.message) {
@@ -396,9 +367,12 @@ export default function CreateArticlePage() {
             />
 
             <div className="bg-white border border-gray-200 rounded-xl p-5">
-                <a href='/admin/articles' className='flex items-center gap-2 text-gray-700 hover:text-black duration-300 group mb-4'>
+                <a
+                    onClick={() => router.push('/admin/articles')}
+                    className='flex items-center gap-2 text-gray-700 hover:text-black duration-300 group mb-4 cursor-pointer'
+                >
                     <MoveLeft className='w-4 h-4 group-hover:-translate-x-2 duration-300' />
-                    <span>Create Article</span>
+                    <span>Edit Article</span>
                 </a>
 
                 <div className="flex flex-col items-start space-y-5">
@@ -425,11 +399,24 @@ export default function CreateArticlePage() {
                             <p className="text-sm text-center px-4">
                                 Drag and drop image here or <span className="text-blue-500 font-medium">click to upload</span>
                             </p>
-                            {fileName && (
+
+                            {fileName ? (
                                 <p className="mt-2 text-sm text-gray-600">
                                     Selected: <span className="font-medium">{fileName}</span>
                                 </p>
-                            )}
+                            ) : uploadedImageUrl ? (
+                                <p className="mt-2 text-sm text-gray-600">
+                                    Current image: <a
+                                        href={uploadedImageUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:underline"
+                                    >
+                                        View
+                                    </a>
+                                </p>
+                            ) : null}
+
                             <input
                                 type="file"
                                 id="fileInput"
@@ -532,20 +519,19 @@ export default function CreateArticlePage() {
                     </div>
 
                     <div className="w-full pt-4 grid lg:grid-cols-2 md:grid-cols-3 sm:grid-cols-1 items-center gap-4">
-                        <a
-                            href="/admin/articles"
+                        <button
+                            onClick={() => router.push('/admin/articles')}
                             className="w-full text-center cursor-pointer bg-white hover:bg-gray-100 border border-gray-200 text-black font-medium py-2 px-4 rounded-md transition-colors"
                         >
                             Cancel
-                        </a>
+                        </button>
 
                         <button
-                            type="button"
                             onClick={handleSubmit}
                             disabled={loading}
                             className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors"
                         >
-                            {loading ? "Creating..." : "Create Article"}
+                            {loading ? "Saving Changes..." : "Save Changes"}
                         </button>
                     </div>
                 </div>

@@ -16,12 +16,20 @@ export const useAuth = (requiredRole = null) => {
     const router = useRouter();
 
     const logout = useCallback(() => {
+        // Hapus dari cookies
         Cookies.remove('token');
         Cookies.remove('role');
+
+        // Hapus dari localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('auth_token');
+
         setUser(null);
         setIsAuthenticated(false);
         router.push('/');
     }, [router]);
+      
 
     useEffect(() => {
         const checkAuth = () => {

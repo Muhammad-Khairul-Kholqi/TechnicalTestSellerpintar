@@ -3,12 +3,77 @@ import { useEffect, useState, useRef } from "react";
 import { User, LogOut } from "lucide-react";
 import ConfirmModal from "@/app/utils/alert/confirmModal";
 import { useAuth } from "@/app/hooks/useAuth";
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 export default function SecondHeader() {
     const [profileOpen, setProfileOpen] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const profileRef = useRef(null);
     const { logout } = useAuth();
+    const [username, setUsername] = useState('');
+    const [role, setRole] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [initial, setInitial] = useState('U');
+
+    const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+
+    const getAuthToken = () => {
+        return Cookies.get('token') ||
+            localStorage.getItem('token') ||
+            localStorage.getItem('accessToken') ||
+            localStorage.getItem('auth_token');
+    };
+
+    const handleAuthError = () => {
+        Cookies.remove('token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('auth_token');
+
+        toast.error("Session expired. Please login again.");
+
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    };
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            setIsLoading(true);
+            const token = getAuthToken();
+
+            if (!token) {
+                handleAuthError();
+                return;
+            }
+
+            try {
+                const response = await axios.get(`${BASE_API}/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const userData = response.data;
+                setUsername(userData.username);
+                setRole(userData.role);
+
+                if (userData.username && userData.username.length > 0) {
+                    setInitial(userData.username.charAt(0).toUpperCase());
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                    handleAuthError();
+                } else {
+                    toast.error("Failed to load profile data");
+                }
+            }
+        };
+
+        fetchUserProfile();
+    }, [BASE_API]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -32,9 +97,9 @@ export default function SecondHeader() {
                             onClick={() => setProfileOpen((prev) => !prev)}
                         >
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#BFDBFE]">
-                                <span className="font-medium text-[#1E3A8A]">K</span>
+                                <span className="font-medium text-[#1E3A8A]">{initial}</span>
                             </div>
-                            <span className="hidden sm:inline">Khairul Kholqi</span>
+                            <span className="hidden sm:inline">{username}</span>
                         </div>
 
                         {profileOpen && (

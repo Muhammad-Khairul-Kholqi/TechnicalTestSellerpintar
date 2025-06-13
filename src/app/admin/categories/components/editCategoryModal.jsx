@@ -4,12 +4,33 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Cookies from 'js-cookie';
 
 export default function EditCategoryModal({ category, onClose, onSuccess }) {
     const [name, setName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const BASE_API = process.env.NEXT_PUBLIC_BASE_API || "https://test-fe.mysellerpintar.com/api";
+    const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+
+    const getAuthToken = () => {
+        return Cookies.get('token') ||
+            localStorage.getItem('token') ||
+            localStorage.getItem('accessToken') ||
+            localStorage.getItem('auth_token');
+    };
+
+    const handleAuthError = () => {
+        Cookies.remove('token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('auth_token');
+
+        toast.error("Session expired. Please login again.");
+
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    };
 
     useEffect(() => {
         if (category) {
@@ -18,22 +39,17 @@ export default function EditCategoryModal({ category, onClose, onSuccess }) {
     }, [category]);
 
     const handleEditCategory = async () => {
-        // Debug logging
-        console.log("Category data:", category);
 
-        // Validation
         if (!name.trim()) {
             toast.error("Please input a category name.");
             return;
         }
 
-        // Check if name has changed
         if (name.trim() === category?.name) {
             toast.info("No changes detected.");
             return;
         }
 
-        // Get category ID with multiple possible field names
         const categoryId = category?.id || category?._id || category?.categoryId;
 
         if (!categoryId) {
@@ -45,13 +61,10 @@ export default function EditCategoryModal({ category, onClose, onSuccess }) {
         setIsLoading(true);
 
         try {
-            // Get token from localStorage
-            const token = localStorage.getItem('token') ||
-                localStorage.getItem('accessToken') ||
-                localStorage.getItem('auth_token');
+            const token = getAuthToken();
 
             if (!token) {
-                toast.error("Authentication required. Please login first.");
+                handleAuthError();
                 return;
             }
 
@@ -68,10 +81,8 @@ export default function EditCategoryModal({ category, onClose, onSuccess }) {
                 }
             );
 
-            // Success handling
             toast.success("Category updated successfully!");
 
-            // Call onSuccess callback if provided (to refresh the parent component data)
             if (onSuccess) {
                 onSuccess();
             }
@@ -79,9 +90,7 @@ export default function EditCategoryModal({ category, onClose, onSuccess }) {
         } catch (error) {
             console.error("Error updating category:", error);
 
-            // Handle different types of errors
             if (error.response) {
-                // Server responded with error status
                 const status = error.response.status;
                 const errorMessage = error.response.data?.message ||
                     error.response.data?.error ||
@@ -99,10 +108,8 @@ export default function EditCategoryModal({ category, onClose, onSuccess }) {
                     toast.error(typeof errorMessage === 'string' ? errorMessage : `Failed to update category. Status: ${status}`);
                 }
             } else if (error.request) {
-                // Request was made but no response received
                 toast.error("Network error. Please check your connection.");
             } else {
-                // Something else happened
                 toast.error("An unexpected error occurred.");
             }
         } finally {
@@ -123,7 +130,6 @@ export default function EditCategoryModal({ category, onClose, onSuccess }) {
     };
 
     const handleCancel = () => {
-        // Reset to original name if user cancels
         if (category) {
             setName(category.name || "");
         }

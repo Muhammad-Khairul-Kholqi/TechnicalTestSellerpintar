@@ -1,4 +1,8 @@
 import { useAuth } from "@/app/hooks/useAuth";
+import {
+    Lock,
+    AlertTriangle
+} from 'lucide-react';
 
 const ProtectedRoute = ({ children, requiredRole = null, fallback = null }) => {
     const { user, loading, isAuthenticated } = useAuth(requiredRole);

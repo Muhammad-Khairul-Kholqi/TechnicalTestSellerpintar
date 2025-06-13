@@ -4,12 +4,33 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Cookies from 'js-cookie';
 
 export default function AddCategoryModal({ onClose, onSuccess }) {
     const [category, setCategory] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
+
+    const getAuthToken = () => {
+        return Cookies.get('token') ||
+            localStorage.getItem('token') ||
+            localStorage.getItem('accessToken') ||
+            localStorage.getItem('auth_token');
+    };
+
+    const handleAuthError = () => {
+        Cookies.remove('token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('auth_token');
+
+        toast.error("Session expired. Please login again.");
+
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    };
 
     const handleAddCategory = async () => {
         if (!category.trim()) {
@@ -20,12 +41,10 @@ export default function AddCategoryModal({ onClose, onSuccess }) {
         setIsLoading(true);
 
         try {
-            const token = localStorage.getItem('token') ||
-                localStorage.getItem('accessToken') ||
-                localStorage.getItem('auth_token');
+            const token = getAuthToken();
 
             if (!token) {
-                toast.error("Authentication required. Please login first.");
+                handleAuthError();
                 return;
             }
 
@@ -53,8 +72,6 @@ export default function AddCategoryModal({ onClose, onSuccess }) {
             setTimeout(() => {
                 onClose();
             }, 1000);
-
-            console.log(response.status)
 
         } catch (error) {
             console.error("Error adding category:", error);
@@ -107,6 +124,7 @@ export default function AddCategoryModal({ onClose, onSuccess }) {
                 draggable
                 pauseOnHover
             />
+
             <div
                 className="fixed inset-0 bg-black/40 bg-opacity-30 flex items-center justify-center z-50"
                 onClick={handleOverlayClick}
